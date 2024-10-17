@@ -6,6 +6,7 @@ import { Home } from "./pages/home";
 import { Layout } from "./components/layout";
 import { Projects } from "./pages/projects";
 import { Project } from "./pages/project";
+import { AuthContextProvider } from "./auth";
 
 const router = createBrowserRouter([
   {
@@ -24,8 +25,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <ChakraProvider>
-    <Layout>
-      <RouterProvider router={router} />
-    </Layout>
+    <AuthContextProvider>
+      <Layout>
+        <RouterProvider router={router} />
+      </Layout>
+    </AuthContextProvider>
   </ChakraProvider>
 );
