@@ -1,7 +1,7 @@
-import { Alert, AlertIcon, Box, Button, Input, Stack } from "@chakra-ui/react";
+import { Alert, AlertIcon, Button, Input, Stack } from "@chakra-ui/react";
+import { AuthError } from "@supabase/supabase-js";
 import { useState } from "react";
 import { login } from "../supabase";
-import { AuthError } from "@supabase/supabase-js";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");

@@ -10,11 +10,11 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { useParams } from "react-router-dom";
-import { Tables } from "../supabase.types";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { supabase } from "../supabase";
 import { PostgrestError } from "@supabase/supabase-js";
+import { ChangeEvent, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { supabase } from "../supabase";
+import { Tables } from "../supabase.types";
 
 import * as tus from "tus-js-client";
 import { useSession } from "../auth";
