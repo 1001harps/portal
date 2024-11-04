@@ -58,8 +58,6 @@ export const ProjectsList = () => {
       trackCounts[track.project_id]++;
     });
 
-    console.log(trackCounts);
-
     setTrackCounts(trackCounts);
   };
 
@@ -90,7 +88,7 @@ export const ProjectsList = () => {
 
       <List spacing={2}>
         {projects.map((p) => (
-          <ListItem>
+          <ListItem key={p.id}>
             <Stack
               as={Link}
               href={`/projects/${p.id}`}
@@ -104,7 +102,7 @@ export const ProjectsList = () => {
               <Text>
                 {p.id in trackCounts
                   ? `${trackCounts[p.id]} ${
-                      trackCounts[p.id] ? "track" : "tracks"
+                      trackCounts[p.id] === 1 ? "track" : "tracks"
                     }`
                   : "0 tracks"}
               </Text>

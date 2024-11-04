@@ -27,3 +27,15 @@ export const login = async (email: string, password: string) => {
 export const logout = async () => {
   return await supabase.auth.signOut();
 };
+
+export const getTrackUrl = async (path: string) => {
+  const result = await supabase.storage
+    .from("uploads")
+    .createSignedUrl(path, 3600);
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  return result.data.signedUrl;
+};
