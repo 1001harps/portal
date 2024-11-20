@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "gen-supabase-types": "supabase gen types --lang=typescript --project-id nkiyorffqmzusmlnjshp --schema public > src/database.types.ts"
+    "gen-supabase-types": "supabase gen types --lang=typescript --project-id nkiyorffqmzusmlnjshp --schema public > src/supabase.types.ts"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",

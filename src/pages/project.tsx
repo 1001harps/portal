@@ -94,7 +94,6 @@ export const Project = () => {
 
         await supabase
           .from("tracks")
-          // @ts-ignore, TODO: figure out why the types aren't working
           .update({ uploaded: true })
           .eq("id", track.id);
 
@@ -157,16 +156,16 @@ export const Project = () => {
     fetchTracks(projectId);
   }, [projectId]);
 
-  const onPlayClick = async (trackId: string) => {
-    if (trackId === player.trackId) {
+  const onPlayClick = async (track: Tables<"tracks">) => {
+    if (track.id === player.track?.id) {
       player.clear();
       return;
     }
 
-    const path = `${session?.user.id}/${trackId}.mp3`;
+    const path = `${session?.user.id}/${track.id}.mp3`;
     const url = await getTrackUrl(path);
 
-    player.play(trackId, url);
+    player.play(track, url);
   };
 
   const onDeleteClick = async () => {
@@ -226,8 +225,8 @@ export const Project = () => {
                 {t.name}
               </Text>
 
-              <Button size="sm" ml="auto" onClick={() => onPlayClick(t.id)}>
-                {player.trackId === t.id ? "■" : "▶"}
+              <Button size="sm" ml="auto" onClick={() => onPlayClick(t)}>
+                {player.track?.id === t.id ? "■" : "▶"}
               </Button>
             </HStack>
           </ListItem>
