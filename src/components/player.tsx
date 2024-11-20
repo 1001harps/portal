@@ -137,7 +137,7 @@ export const Player = () => {
   useEffect(() => {
     if (!ref.current) return;
 
-    ref.current.addEventListener("timeupdate", (event) => {
+    ref.current.addEventListener("timeupdate", () => {
       const percent = parseFloat(
         ((ref.current?.currentTime! / ref.current?.duration!) * 100).toFixed(2)
       );

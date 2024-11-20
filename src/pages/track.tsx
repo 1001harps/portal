@@ -46,7 +46,7 @@ export const Track = () => {
 
       try {
         const url = await getTrackUrl(path);
-        player.load(track.id, url);
+        player.load(track, url);
       } catch (error) {
         console.error("failed to fetch file");
       }
