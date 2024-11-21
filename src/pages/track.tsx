@@ -42,8 +42,6 @@ export const Track = () => {
 
       const path = `${session?.user.id}/${track.id}.mp3`;
 
-      console.log(path);
-
       try {
         const url = await getTrackUrl(path);
         player.load(track, url);

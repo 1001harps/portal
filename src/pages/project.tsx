@@ -4,21 +4,19 @@ import {
   Heading,
   HStack,
   List,
-  ListItem,
+  Progress,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import { PostgrestError } from "@supabase/supabase-js";
-import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { getTrackUrl, supabase } from "../supabase";
-import { Tables } from "../supabase.types";
-
-import { Progress } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { useNavigate, useParams } from "react-router-dom";
 import * as tus from "tus-js-client";
 import { useSession } from "../auth";
-import { PlayerContext } from "../components/player";
+import { TrackCard } from "../components/track-card";
+import { supabase } from "../supabase";
+import { Tables } from "../supabase.types";
 
 export const Project = () => {
   const { id: projectId } = useParams();
@@ -26,7 +24,6 @@ export const Project = () => {
   if (!projectId) return <>404</>;
 
   const { session } = useSession();
-  const player = useContext(PlayerContext);
 
   const navigate = useNavigate();
 
@@ -156,18 +153,6 @@ export const Project = () => {
     fetchTracks(projectId);
   }, [projectId]);
 
-  const onPlayClick = async (track: Tables<"tracks">) => {
-    if (track.id === player.track?.id) {
-      player.clear();
-      return;
-    }
-
-    const path = `${session?.user.id}/${track.id}.mp3`;
-    const url = await getTrackUrl(path);
-
-    player.play(track, url);
-  };
-
   const onDeleteClick = async () => {
     const result = await supabase.from("projects").delete().eq("id", projectId);
 
@@ -222,19 +207,10 @@ export const Project = () => {
       <Heading size="lg" mb="16px">
         tracks:
       </Heading>
-      <List spacing={2}>
-        {tracks.map((t) => (
-          <ListItem key={t.id}>
-            <HStack>
-              <Text as={Link} to={`/tracks/${t.id}`} key={t.id}>
-                {t.name}
-              </Text>
 
-              <Button size="sm" ml="auto" onClick={() => onPlayClick(t)}>
-                {player.track?.id === t.id ? "■" : "▶"}
-              </Button>
-            </HStack>
-          </ListItem>
+      <List spacing={2} mb="100px">
+        {tracks.map((t) => (
+          <TrackCard key={t.id} track={t} />
         ))}
       </List>
     </>
