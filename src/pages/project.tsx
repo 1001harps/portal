@@ -3,7 +3,6 @@ import {
   Flex,
   Heading,
   HStack,
-  Link,
   List,
   ListItem,
   Stack,
@@ -11,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getTrackUrl, supabase } from "../supabase";
 import { Tables } from "../supabase.types";
 
@@ -227,7 +226,7 @@ export const Project = () => {
         {tracks.map((t) => (
           <ListItem key={t.id}>
             <HStack>
-              <Text as={Link} href={`/tracks/${t.id}`} key={t.id}>
+              <Text as={Link} to={`/tracks/${t.id}`} key={t.id}>
                 {t.name}
               </Text>
 

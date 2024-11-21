@@ -4,7 +4,6 @@ import {
   Heading,
   HStack,
   Input,
-  Link,
   List,
   ListItem,
   Stack,
@@ -13,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { Tables } from "../supabase.types";
+import { Link } from "react-router-dom";
 
 export const ProjectsList = () => {
   const [projects, setProjects] = useState<Tables<"projects">[]>([]);
@@ -91,7 +91,7 @@ export const ProjectsList = () => {
           <ListItem key={p.id}>
             <Stack
               as={Link}
-              href={`/projects/${p.id}`}
+              to={`/projects/${p.id}`}
               border="1px solid black"
               p="16px"
               key={p.id}
