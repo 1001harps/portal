@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
   const supabaseClient = createClient<Database>(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_KEY")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
   const res = await supabaseClient.storage.from("uploads").download(
