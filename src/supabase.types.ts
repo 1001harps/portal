@@ -9,6 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      notes: {
+        Row: {
+          created_at: string
+          id: number
+          note: string
+          time_seconds: number
+          track_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          note: string
+          time_seconds: number
+          track_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          note?: string
+          time_seconds?: number
+          track_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           created_at: string
@@ -76,7 +108,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_projects: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          created_at: string
+          updated_at: string
+          user_id: string
+          track_count: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
