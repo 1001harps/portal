@@ -11,13 +11,15 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
-import { Tables } from "../supabase.types";
+import { Database } from "../supabase.types";
 import { Link } from "react-router-dom";
 
+type Project =
+  Database["public"]["Functions"]["get_projects"]["Returns"][number];
+
 export const ProjectsList = () => {
-  const [projects, setProjects] = useState<Tables<"projects">[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [newProjectName, setNewProjectName] = useState("");
-  const [trackCounts, setTrackCounts] = useState<Record<string, number>>({});
 
   const onAddProjectClick = async () => {
     await supabase.from("projects").insert({
@@ -26,12 +28,10 @@ export const ProjectsList = () => {
 
     setNewProjectName("");
     await loadProjects();
-    await loadTrackCounts();
   };
 
   const loadProjects = async () => {
-    const { data, error } = await supabase.from("projects").select();
-
+    const { data, error } = await supabase.rpc("get_projects");
     if (error) {
       console.error(error);
       return;
@@ -40,30 +40,8 @@ export const ProjectsList = () => {
     setProjects(data);
   };
 
-  const loadTrackCounts = async () => {
-    const { data, error } = await supabase.from("tracks").select();
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    const trackCounts: Record<string, number> = {};
-    data.forEach((track) => {
-      if (!(track.project_id in trackCounts)) {
-        trackCounts[track.project_id] = 0;
-        return;
-      }
-
-      trackCounts[track.project_id]++;
-    });
-
-    setTrackCounts(trackCounts);
-  };
-
   useEffect(() => {
     loadProjects();
-    loadTrackCounts();
   }, []);
 
   return (
@@ -100,11 +78,7 @@ export const ProjectsList = () => {
                 {p.name}
               </Heading>
               <Text>
-                {p.id in trackCounts
-                  ? `${trackCounts[p.id]} ${
-                      trackCounts[p.id] === 1 ? "track" : "tracks"
-                    }`
-                  : "0 tracks"}
+                {p.track_count} {p.track_count === 1 ? "track" : "tracks"}
               </Text>
             </Stack>
           </ListItem>
