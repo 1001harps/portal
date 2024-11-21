@@ -1,3 +1,4 @@
+import { HamburgerIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
@@ -7,19 +8,19 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Stack,
 } from "@chakra-ui/react";
-import { HamburgerIcon } from "@chakra-ui/icons";
-import { logout } from "../supabase";
-import { useSession } from "../auth";
-import { Player } from "./player";
 import { Link } from "react-router-dom";
+import { useSession } from "../auth";
+import { logout } from "../supabase";
+import { Player } from "./player";
 
 export const Layout = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn } = useSession();
 
   return (
-    <Box as="main">
-      <HStack p="16px" py="24px" as="header" bg="black">
+    <Stack as="main" align="center">
+      <HStack p="16px" py="24px" as="header" bg="black" w="100%">
         <Heading size="xl" color="white">
           <Link to="/">portal</Link>
         </Heading>
@@ -33,9 +34,11 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
           </MenuList>
         </Menu>
       </HStack>
-      <Box p="16px">{children}</Box>
+      <Box maxW="800px" w="100%" p="16px">
+        {children}
+      </Box>
 
       <Player />
-    </Box>
+    </Stack>
   );
 };

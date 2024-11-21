@@ -1,5 +1,6 @@
 import {
   Button,
+  Flex,
   Heading,
   HStack,
   Link,
@@ -183,23 +184,28 @@ export const Project = () => {
 
   return (
     <>
-      <HStack align="baseline" mb="16px">
-        <Heading mb="16px" as="h2" size="lg">
-          {project.name}
+      <Flex align="baseline" mb="16px" direction="column">
+        <Heading mb="16px" as="h2" size="lg" w="100%">
+          <HStack>
+            <Text w="100%">{project.name}</Text> <Button size="xs">edit</Button>
+          </HStack>
         </Heading>
 
-        <HStack ml="auto">
-          <Button colorScheme="green">Add Collaborator</Button>
+        <HStack ml="auto" w="100%">
+          <Button colorScheme="green" w="100%">
+            Add Collaborator
+          </Button>
 
           <Button
             disabled={tracks.length > 0}
             colorScheme="red"
             onClick={onDeleteClick}
+            w="100%"
           >
             Delete
           </Button>
         </HStack>
-      </HStack>
+      </Flex>
 
       <Stack
         border="2px dashed grey"
