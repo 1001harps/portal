@@ -18,6 +18,8 @@ import { TrackCard } from "../components/track-card";
 import { supabase } from "../supabase";
 import { Tables } from "../supabase.types";
 
+type Track = Tables<"tracks"> & { projects: { name: string } };
+
 export const Project = () => {
   const { id: projectId } = useParams();
 
@@ -28,7 +30,7 @@ export const Project = () => {
   const navigate = useNavigate();
 
   const [project, setProject] = useState<Tables<"projects"> | null>(null);
-  const [tracks, setTracks] = useState<Tables<"tracks">[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [error, setError] = useState<PostgrestError | null>(null);
 
   const [_uploading, setUploading] = useState(false);
@@ -136,14 +138,25 @@ export const Project = () => {
   const fetchTracks = async (id: string) => {
     const { data, error } = await supabase
       .from("tracks")
-      .select()
+      .select(
+        ` 
+        id,
+        created_at,
+        project_id,
+        name,
+        user_id,
+        uploaded,
+        preview_data,
+        projects ( name )
+        `
+      )
       .eq("project_id", id);
     if (error) {
       setError(error);
       return;
     }
 
-    setTracks(data);
+    setTracks(data as Track[]);
   };
 
   useEffect(() => {

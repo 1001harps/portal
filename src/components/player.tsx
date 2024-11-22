@@ -16,6 +16,7 @@ import {
   useState,
 } from "react";
 import { Track } from "../supabase";
+import { format } from "date-fns";
 
 const roundFloat = (n: number, decimals: number = 2) => {
   return parseFloat(n.toFixed(decimals));
@@ -28,6 +29,8 @@ interface PlayerContextValue {
   seek: (percent: number) => void;
   track: Track | null;
   trackPercent: number;
+  currentTimeSeconds: number;
+  trackDurationSeconds: number;
 }
 
 export const PlayerContext = createContext<PlayerContextValue>({
@@ -37,12 +40,16 @@ export const PlayerContext = createContext<PlayerContextValue>({
   clear: () => {},
   track: null,
   trackPercent: 0,
+  currentTimeSeconds: 0,
+  trackDurationSeconds: 0,
 });
 
 export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const ref = useRef<HTMLAudioElement>(null);
   const [track, setTrack] = useState<Track | null>(null);
   const [trackPercent, setTrackPercent] = useState(0);
+  const [currentTimeSeconds, setCurrentTimeSeconds] = useState(0);
+  const [trackDurationSeconds, setTrackDurationSeconds] = useState(0);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -52,6 +59,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
         ((ref.current?.currentTime! / ref.current?.duration!) * 100).toFixed(2)
       );
 
+      setCurrentTimeSeconds(ref.current?.currentTime!);
       setTrackPercent(percent);
     };
 
@@ -71,7 +79,9 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       setTrack(track);
 
       ref.current.src = url;
+
       await ref.current.play();
+      setTrackDurationSeconds(ref.current.duration);
       if (seekPercent > 0) {
         ref.current.currentTime = roundFloat(
           seekPercent * ref.current.duration
@@ -87,6 +97,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       setTrack(track);
 
       ref.current.src = url;
+
+      setTrackDurationSeconds(ref.current.duration);
     };
 
     const clear = () => {
@@ -99,6 +111,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       ref.current.pause();
       ref.current.currentTime = 0;
       ref.current.src = "";
+      setCurrentTimeSeconds(0);
+      setTrackPercent(0);
     };
 
     const seek = (percent: number) => {
@@ -107,6 +121,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       if (!ref.current?.src) return;
 
       ref.current.currentTime = roundFloat(percent * ref.current.duration);
+      setCurrentTimeSeconds(ref.current.currentTime);
       ref.current.play();
     };
 
@@ -120,7 +135,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   }, [track]);
 
   return (
-    <PlayerContext.Provider value={{ ...value, trackPercent }}>
+    <PlayerContext.Provider
+      value={{
+        ...value,
+        trackPercent,
+        currentTimeSeconds,
+        trackDurationSeconds,
+      }}
+    >
       <Box display="none" as="audio" w="100%" ref={ref} controls></Box>
       {children}
     </PlayerContext.Provider>
@@ -129,8 +151,12 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
 const usePlayer = () => useContext(PlayerContext);
 
+const formatSeconds = (timeSeconds: number) =>
+  format(timeSeconds * 1000, "m:ss");
+
 export const Player = () => {
-  const { trackPercent } = usePlayer();
+  const { trackPercent, currentTimeSeconds, trackDurationSeconds, track } =
+    usePlayer();
 
   return (
     <Flex
@@ -155,8 +181,19 @@ export const Player = () => {
         </HStack>
 
         <HStack>
-          <Text>0.00 / 3.20</Text>
-          <Text>cockroach / airpod sunset</Text>
+          <Text>
+            {formatSeconds(currentTimeSeconds)}
+            {" / "}
+            {formatSeconds(trackDurationSeconds)}
+          </Text>
+          {track && (
+            <Text>
+              {track.name}
+              {" / "}
+              {/* @ts-ignore */}
+              {track.projects?.name}
+            </Text>
+          )}
         </HStack>
       </HStack>
     </Flex>
