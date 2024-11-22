@@ -30,14 +30,13 @@ export const Waveform = ({
     const context = canvasRef.current.getContext("2d");
     if (!context) return;
 
-    context.fillStyle = "black";
-
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < 1000; i += 4) {
       const s = data[i];
+      context.fillStyle = "#367beb";
 
       const height = Math.floor((s / 255) * HEIGHT);
       const y = (HEIGHT - height) / 2;
-      context.fillRect(i, y, 1, height);
+      context.fillRect(i, y, 4, height);
     }
   }, [data]);
 
@@ -63,15 +62,6 @@ export const Waveform = ({
       cursor="pointer"
       userSelect="none"
     >
-      {currentlyPlaying && (
-        <Box
-          background="red"
-          gridRow="1/2"
-          gridColumn="1/2"
-          w={`${trackPercent}%`}
-        />
-      )}
-
       <Box gridRow="1/2" gridColumn="1/2" onClick={onWaveformClick}>
         <canvas
           style={{ width: "100%", height: "80px", imageRendering: "pixelated" }}
@@ -80,6 +70,18 @@ export const Waveform = ({
           height={`${HEIGHT}px`}
         ></canvas>
       </Box>
+
+      {currentlyPlaying && (
+        <Box
+          mixBlendMode="difference"
+          background="white"
+          z-index={1000}
+          filter="hue-rotate(100deg)"
+          gridRow="1/2"
+          gridColumn="1/2"
+          w={`${trackPercent}%`}
+        />
+      )}
     </Grid>
   );
 };
