@@ -1,23 +1,15 @@
 import { Box, Button, HStack, Input } from "@chakra-ui/react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getTrackUrl, supabase } from "../supabase";
 import { useContext, useEffect, useState } from "react";
-import { Tables } from "../supabase.types";
+import { useNavigate, useParams } from "react-router-dom";
 import { useSession } from "../auth";
 import { PlayerContext } from "../components/player";
-
-const fetchTrack = async (id: string) => {
-  const result = await supabase
-    .from("tracks")
-    .select()
-    .eq("id", id)
-    .limit(1)
-    .single();
-
-  if (result.error) throw result.error;
-
-  return result.data;
-};
+import {
+  deleteTrack,
+  getTrack,
+  getTrackUrl,
+  updateTrackName,
+} from "../supabase";
+import { Tables } from "../supabase.types";
 
 export const Track = () => {
   const { id } = useParams();
@@ -25,46 +17,45 @@ export const Track = () => {
 
   const [loading, setLoading] = useState(true);
   const [track, setTrack] = useState<Tables<"tracks"> | null>(null);
-
   const [name, setName] = useState("");
 
   const { session } = useSession();
 
   const player = useContext(PlayerContext);
 
+  const loadTrack = async () => {
+    const { data, error } = await getTrack(id!);
+
+    // TODO: handle error properly
+    if (error) throw error;
+    if (!data) throw "track not found";
+
+    setTrack(data);
+
+    const path = `${session?.user.id}/${data.id}.mp3`;
+
+    try {
+      const url = await getTrackUrl(path);
+      player.load(data, url);
+    } catch (error) {
+      console.error("failed to fetch file");
+    }
+
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!session?.user.id) return;
-
-    fetchTrack(id!).then(async (track) => {
-      setTrack(track);
-
-      if (!track) return;
-
-      const path = `${session?.user.id}/${track.id}.mp3`;
-
-      try {
-        const url = await getTrackUrl(path);
-        player.load(track, url);
-      } catch (error) {
-        console.error("failed to fetch file");
-      }
-
-      setLoading(false);
-    });
+    loadTrack();
   }, [session?.user.id]);
 
   useEffect(() => {
     if (!track) return;
-
     setName(track.name);
   }, [track]);
 
   const onNameUpdateClick = async () => {
-    const result = await supabase
-      .from("tracks")
-      .update({ name: name })
-      .eq("id", id!)
-      .select();
+    const result = await updateTrackName(id!, name);
 
     if (result.error) throw result.error;
 
@@ -72,7 +63,7 @@ export const Track = () => {
   };
 
   const onDeleteClick = async () => {
-    const result = await supabase.from("tracks").delete().eq("id", id!);
+    const result = await deleteTrack(id!);
 
     if (result.error) throw result.error;
 

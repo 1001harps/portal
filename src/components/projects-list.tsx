@@ -10,28 +10,23 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { supabase } from "../supabase";
-import { Database } from "../supabase.types";
+import { createProject, getProjects, Project } from "../supabase";
 import { Link } from "react-router-dom";
-
-type Project =
-  Database["public"]["Functions"]["get_projects"]["Returns"][number];
 
 export const ProjectsList = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [newProjectName, setNewProjectName] = useState("");
 
   const onAddProjectClick = async () => {
-    await supabase.from("projects").insert({
-      name: newProjectName,
-    });
+    // TODO: error handling
+    await createProject(newProjectName);
 
     setNewProjectName("");
     await loadProjects();
   };
 
   const loadProjects = async () => {
-    const { data, error } = await supabase.rpc("get_projects");
+    const { data, error } = await getProjects();
     if (error) {
       console.error(error);
       return;

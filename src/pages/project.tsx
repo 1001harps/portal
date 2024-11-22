@@ -8,19 +8,19 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { PostgrestError } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { useNavigate, useParams } from "react-router-dom";
 import * as tus from "tus-js-client";
 import { useSession } from "../auth";
 import { TrackCard } from "../components/track-card";
-import { supabase } from "../supabase";
-import { Tables } from "../supabase.types";
-
-type Project = Tables<"projects"> & {
-  tracks: Tables<"tracks">[];
-};
+import {
+  createTrack,
+  deleteProject,
+  getProject,
+  ProjectWithTracks,
+  setTrackUploaded,
+} from "../supabase";
 
 export const Project = () => {
   const { id: projectId } = useParams();
@@ -31,8 +31,8 @@ export const Project = () => {
 
   const navigate = useNavigate();
 
-  const [project, setProject] = useState<Project | null>(null);
-  const [error, setError] = useState<PostgrestError | null>(null);
+  const [project, setProject] = useState<ProjectWithTracks | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [_uploading, setUploading] = useState(false);
 
@@ -48,16 +48,11 @@ export const Project = () => {
     // TODO: validate file type
 
     // TODO: can we make this record automatically on the backend?
-    const result = await supabase
-      .from("tracks")
-      .insert({ name: file.name, project_id: projectId })
-      .select();
-
-    if (result.error) {
-      throw result.error;
+    const { data: track, error } = await createTrack(file.name, projectId);
+    if (error) {
+      throw error;
     }
 
-    const track = result.data.at(0);
     if (!track) {
       throw "failed to create track";
     }
@@ -92,12 +87,9 @@ export const Project = () => {
       onSuccess: async function () {
         console.log("Download %s from %s", upload.file, upload.url);
 
-        await supabase
-          .from("tracks")
-          .update({ uploaded: true })
-          .eq("id", track.id);
+        await setTrackUploaded(track.id);
 
-        await fetchProject(projectId);
+        await loadProject();
 
         setUploading(false);
         setUploadPercent(0);
@@ -120,19 +112,10 @@ export const Project = () => {
     },
   });
 
-  const fetchProject = async (id: string) => {
-    const { data, error } = await supabase
-      .from("projects")
-      .select(
-        `*,
-        tracks ( * )`
-      )
-      .eq("id", id)
-      .limit(1)
-      .single();
-
+  const loadProject = async () => {
+    const { data, error } = await getProject(projectId);
     if (error) {
-      setError(error);
+      setError(error.message);
       return;
     }
 
@@ -142,11 +125,11 @@ export const Project = () => {
   useEffect(() => {
     if (!projectId) return;
 
-    fetchProject(projectId);
+    loadProject();
   }, [projectId]);
 
   const onDeleteClick = async () => {
-    const result = await supabase.from("projects").delete().eq("id", projectId);
+    const result = await deleteProject(projectId);
 
     if (result.error) {
       throw result.error;
@@ -155,7 +138,7 @@ export const Project = () => {
     navigate(`/projects`);
   };
 
-  if (error) return <HStack>{error.message}</HStack>;
+  if (error) return <HStack>{error}</HStack>;
   if (!project) return <HStack>loading</HStack>;
 
   return (
