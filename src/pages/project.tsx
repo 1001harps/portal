@@ -18,7 +18,9 @@ import { TrackCard } from "../components/track-card";
 import { supabase } from "../supabase";
 import { Tables } from "../supabase.types";
 
-type Track = Tables<"tracks"> & { projects: { name: string } };
+type Project = Tables<"projects"> & {
+  tracks: Tables<"tracks">[];
+};
 
 export const Project = () => {
   const { id: projectId } = useParams();
@@ -29,8 +31,7 @@ export const Project = () => {
 
   const navigate = useNavigate();
 
-  const [project, setProject] = useState<Tables<"projects"> | null>(null);
-  const [tracks, setTracks] = useState<Track[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<PostgrestError | null>(null);
 
   const [_uploading, setUploading] = useState(false);
@@ -96,7 +97,7 @@ export const Project = () => {
           .update({ uploaded: true })
           .eq("id", track.id);
 
-        await fetchTracks(projectId);
+        await fetchProject(projectId);
 
         setUploading(false);
         setUploadPercent(0);
@@ -122,7 +123,10 @@ export const Project = () => {
   const fetchProject = async (id: string) => {
     const { data, error } = await supabase
       .from("projects")
-      .select()
+      .select(
+        `*,
+        tracks ( * )`
+      )
       .eq("id", id)
       .limit(1)
       .single();
@@ -135,35 +139,10 @@ export const Project = () => {
     setProject(data);
   };
 
-  const fetchTracks = async (id: string) => {
-    const { data, error } = await supabase
-      .from("tracks")
-      .select(
-        ` 
-        id,
-        created_at,
-        project_id,
-        name,
-        user_id,
-        uploaded,
-        preview_data,
-        projects ( name )
-        `
-      )
-      .eq("project_id", id);
-    if (error) {
-      setError(error);
-      return;
-    }
-
-    setTracks(data as Track[]);
-  };
-
   useEffect(() => {
     if (!projectId) return;
 
     fetchProject(projectId);
-    fetchTracks(projectId);
   }, [projectId]);
 
   const onDeleteClick = async () => {
@@ -194,7 +173,7 @@ export const Project = () => {
           </Button>
 
           <Button
-            disabled={tracks.length > 0}
+            disabled={project.tracks.length > 0}
             colorScheme="red"
             onClick={onDeleteClick}
             w="100%"
@@ -222,7 +201,7 @@ export const Project = () => {
       </Heading>
 
       <List spacing={2} mb="100px">
-        {tracks.map((t) => (
+        {project.tracks.map((t) => (
           <TrackCard key={t.id} track={t} />
         ))}
       </List>
