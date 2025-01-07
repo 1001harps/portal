@@ -17,6 +17,7 @@ import { TrackCard } from "../components/track-card";
 import {
   createTrack,
   deleteProject,
+  deleteTrack,
   getProject,
   ProjectWithTracks,
   setTrackUploaded,
@@ -138,6 +139,14 @@ export const Project = () => {
     navigate(`/projects`);
   };
 
+  const onDeleteTrackClick = async (id: string) => {
+    const result = await deleteTrack(id);
+
+    if (result.error) throw result.error;
+
+    loadProject();
+  };
+
   if (error) return <HStack>{error}</HStack>;
   if (!project) return <HStack>loading</HStack>;
 
@@ -185,7 +194,11 @@ export const Project = () => {
 
       <List spacing={2} mb="100px">
         {project.tracks.map((t) => (
-          <TrackCard key={t.id} track={t} />
+          <TrackCard
+            key={t.id}
+            track={t}
+            onDeleteClick={() => onDeleteTrackClick(t.id!)}
+          />
         ))}
       </List>
     </>

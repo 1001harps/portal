@@ -1,15 +1,15 @@
 import { Box, Button, HStack, Text } from "@chakra-ui/react";
-import { getTrackUrl, Track } from "../supabase";
-import { Waveform } from "./waveform";
-import { PlayerContext } from "./player";
-import { useContext, useMemo } from "react";
+import { useContext } from "react";
 import { useSession } from "../auth";
+import { getTrackUrl, Track } from "../supabase";
+import { PlayerContext } from "./player";
 
 interface TrackCardProps {
   track: Track;
+  onDeleteClick: () => void;
 }
 
-export const TrackCard = ({ track }: TrackCardProps) => {
+export const TrackCard = ({ track, onDeleteClick }: TrackCardProps) => {
   const { session } = useSession();
   const { play, track: trackPlaying, clear, seek } = useContext(PlayerContext);
 
@@ -28,13 +28,13 @@ export const TrackCard = ({ track }: TrackCardProps) => {
     play(track, url, seekPercent);
   };
 
-  const waveformData = useMemo(() => {
-    // @ts-ignore
-    return track ? (track.preview_data as number[]) : null;
-  }, [track]);
+  // const waveformData = useMemo(() => {
+  //   // @ts-ignore
+  //   return track ? (track.preview_data as number[]) : null;
+  // }, [track]);
 
   return (
-    <Box>
+    <Box p="4px">
       <HStack justify="space-between" mb="8px">
         <Text>{track.name}</Text>
 
@@ -52,16 +52,18 @@ export const TrackCard = ({ track }: TrackCardProps) => {
             {currentlyPlaying ? "pause" : "play"}
           </Button>
           <Button size="sm">share</Button>
-          <Button size="sm">+ note</Button>
-          <Button size="sm">..</Button>
+          <Button colorScheme="red" size="sm" onClick={onDeleteClick}>
+            delete
+          </Button>
+          {/* <Button size="sm">..</Button> */}
         </HStack>
       </HStack>
 
-      <Waveform
+      {/* <Waveform
         data={waveformData}
         onClick={playTrack}
         currentlyPlaying={currentlyPlaying}
-      />
+      /> */}
     </Box>
   );
 };
